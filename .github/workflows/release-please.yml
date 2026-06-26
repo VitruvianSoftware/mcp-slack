@@ -36,7 +36,7 @@ jobs:
           release-type: node
 
       # The steps below only run when a release is created
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         if: ${{ steps.release.outputs.release_created }}
 
       - uses: actions/setup-node@v6
