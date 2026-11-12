@@ -1,12 +1,12 @@
-# `mcp-slack` Gemini Spark Custom App Integration Walkthrough
+# `vitruvian-slack-mcp` Gemini Spark Custom App Integration Walkthrough
 
-We have extended `mcp-slack` to support Google Gemini Spark custom MCP connections and added comprehensive documentation with visual sequence diagrams.
+We have extended `vitruvian-slack-mcp` to support Google Gemini Spark custom MCP connections and added comprehensive documentation with visual sequence diagrams.
 
 ---
 
 ## 🏛️ The Two Usage Modes
 
-`mcp-slack` supports two operating modes tailored to different execution environments and trust boundaries:
+`vitruvian-slack-mcp` supports two operating modes tailored to different execution environments and trust boundaries:
 
 | Property | Mode 1: Local Stdio Transport | Mode 2: Hosted Streamable HTTP Transport |
 |---|---|---|
@@ -28,7 +28,7 @@ sequenceDiagram
     autonumber
     actor Dev as Developer (James)
     participant IDE as Agent IDE (Antigravity / Claude)
-    participant Server as mcp-slack (stdio Process)
+    participant Server as vitruvian-slack-mcp (stdio Process)
     participant SlackAPI as Slack Web API
 
     Dev->>IDE: "Post update to #dev" / "Search my DMs"
@@ -54,7 +54,7 @@ sequenceDiagram
     actor User as James
     participant Spark as Google Gemini Spark
     participant Envoy as Envoy Gateway / Ingress
-    participant Server as mcp-slack (K8s Pod)
+    participant Server as vitruvian-slack-mcp (K8s Pod)
     participant Zitadel as Zitadel IdP (auth.ipv1337.dev)
     participant SlackAPI as Slack Web API
 
@@ -86,14 +86,14 @@ sequenceDiagram
 
 ## 🛠️ Summary of Code Changes in PR #1966
 
-1. **RFC 9728 Discovery** in [`httpTransport.ts`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/src/httpTransport.ts):
+1. **RFC 9728 Discovery** in [`httpTransport.ts`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/src/httpTransport.ts):
    - Handles `GET /.well-known/oauth-protected-resource` and `/.well-known/oauth-protected-resource/mcp`.
    - Injects `resource_metadata` in `WWW-Authenticate` header on HTTP 401 challenges.
-2. **Ingress Routing** in [`httproute.yaml`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/deploy/chart/templates/httproute.yaml):
+2. **Ingress Routing** in [`httproute.yaml`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/deploy/chart/templates/httproute.yaml):
    - Added `/.well-known/oauth-protected-resource` PathPrefix routing.
 3. **Zitadel OIDC Redirect URIs** in [`main.go`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/infrastructure/pulumi/platform/zitadel-apps-mcp-slack/main.go):
    - Added Gemini Spark `googleusercontent.com` OAuth callback URIs.
-4. **Documentation** in [`README.md`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/README.md) & [`docs/index.md`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/docs/index.md):
+4. **Documentation** in [`README.md`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/README.md) & [`docs/index.md`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/docs/index.md):
    - Added comprehensive user guides, comparison table, and Mermaid sequence diagrams.
-5. **Unit Tests** in [`httpTransport.test.ts`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/__tests__/httpTransport.test.ts):
+5. **Unit Tests** in [`httpTransport.test.ts`](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/__tests__/httpTransport.test.ts):
    - Added automated tests verifying discovery endpoints and challenge header injection (135 tests passing).

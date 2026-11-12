@@ -1,4 +1,4 @@
-# mcp-slack
+# Vitruvian Slack MCP
 
 Custom Slack MCP server with **dual-token support** — reads via Bot Token, writes/searches via User Token so messages appear as the authenticated user (not a bot).
 
@@ -21,7 +21,7 @@ flowchart TD
         A["OAuth 2.0 Auth"] --> B["Bearer JWT Token"]
     end
 
-    subgraph Service["mcp-slack HTTP Server"]
+    subgraph Service["Vitruvian Slack MCP HTTP Server"]
         B --> C["Validate JWT against Zitadel JWKS"]
         C --> D{"User Token Present?"}
         D -->|Yes - Impersonation Mode| E["Expose 42 Tools (39 if destructive withheld) + Unrestricted Channels/DMs"]
@@ -114,13 +114,13 @@ Depending on your runtime, locate the MCP configuration file (typically `mcp.jso
 Inject the following server definition into the `mcpServers` object:
 
 ```json
-"slack": {
+"vitruvian-slack-mcp": {
   "command": "docker",
   "args": [
     "run", "-i", "--rm",
     "-e", "SLACK_BOT_TOKEN", "-e", "SLACK_USER_TOKEN", "-e", "SLACK_TEAM_ID",
     "-e", "MCP_TRANSPORT=stdio",
-    "ghcr.io/vitruviansoftware/mcp-slack:main"
+    "ghcr.io/vitruviansoftware/vitruvian-slack-mcp:main"
   ],
   "env": {
     "SLACK_BOT_TOKEN": "xoxb-...",
@@ -324,20 +324,19 @@ something to hand-type.
 
 ```bash
 # In the monorepo
-bazel run //apps/mcp/slack:mcp-slack
+bazel run //apps/mcp/vitruvian-slack-mcp
 
 # Or build the image from this directory (the same build CI publishes)
-docker build -t mcp-slack .
+docker build -t vitruvian-slack-mcp .
 ```
 
 ### 5. Client Configuration Guides
 
-> **The npm package is retired.** `@vitruviansoftware/mcp-slack` 1.22.0 was the
-> last npm release, and it is the old TypeScript server. The server is now Rust
-> and ships as the container image below. `npx -y @vitruviansoftware/mcp-slack`
-> still installs 1.22.0 but gets no fixes. It needs Docker running locally. To
-> update the image, run `docker pull ghcr.io/vitruviansoftware/mcp-slack:main`
-> (or pin a digest for a fixed version).
+> **The npm package is retired.** The legacy TypeScript npm distribution was
+> retired after 1.22.0; Vitruvian Slack MCP is now Rust and ships as the
+> container image below. It needs Docker running locally. To update the image,
+> run `docker pull ghcr.io/vitruviansoftware/vitruvian-slack-mcp:main` (or pin
+> a digest for a fixed version).
 
 #### 5.1 Google Antigravity
 Add the server definition to your Antigravity MCP configuration (`~/.gemini/config/mcp_config.json`, `agy mcp add`, or **Antigravity Settings → MCP Servers**):
@@ -345,13 +344,13 @@ Add the server definition to your Antigravity MCP configuration (`~/.gemini/conf
 ```json
 {
   "mcpServers": {
-    "slack": {
+    "vitruvian-slack-mcp": {
       "command": "docker",
       "args": [
         "run", "-i", "--rm",
         "-e", "SLACK_BOT_TOKEN", "-e", "SLACK_USER_TOKEN", "-e", "SLACK_TEAM_ID",
         "-e", "MCP_TRANSPORT=stdio",
-        "ghcr.io/vitruviansoftware/mcp-slack:main"
+        "ghcr.io/vitruviansoftware/vitruvian-slack-mcp:main"
       ],
       "env": {
         "SLACK_BOT_TOKEN": "xoxb-...",
@@ -369,13 +368,13 @@ Add to `~/.claude/mcp.json` or run `claude mcp add`:
 ```json
 {
   "mcpServers": {
-    "slack": {
+    "vitruvian-slack-mcp": {
       "command": "docker",
       "args": [
         "run", "-i", "--rm",
         "-e", "SLACK_BOT_TOKEN", "-e", "SLACK_USER_TOKEN", "-e", "SLACK_TEAM_ID",
         "-e", "MCP_TRANSPORT=stdio",
-        "ghcr.io/vitruviansoftware/mcp-slack:main"
+        "ghcr.io/vitruviansoftware/vitruvian-slack-mcp:main"
       ],
       "env": {
         "SLACK_BOT_TOKEN": "xoxb-...",
@@ -389,33 +388,33 @@ Add to `~/.claude/mcp.json` or run `claude mcp add`:
 
 Or via the Claude Code CLI:
 ```bash
-claude mcp add slack \
+claude mcp add vitruvian-slack-mcp \
   -e SLACK_BOT_TOKEN=xoxb-... -e SLACK_USER_TOKEN=xoxp-... -e SLACK_TEAM_ID=T... \
   -- docker run -i --rm -e SLACK_BOT_TOKEN -e SLACK_USER_TOKEN -e SLACK_TEAM_ID \
-     -e MCP_TRANSPORT=stdio ghcr.io/vitruviansoftware/mcp-slack:main
+     -e MCP_TRANSPORT=stdio ghcr.io/vitruviansoftware/vitruvian-slack-mcp:main
 ```
 
 #### 5.3 Google Gemini Spark (Custom MCP App)
-To connect your hosted `mcp-slack` server to Gemini Spark as a Custom MCP App:
+To connect your hosted Vitruvian Slack MCP server to Gemini Spark as a Custom MCP App:
 
 1. In Gemini Spark, go to **Custom MCP Apps → Add App**.
 2. Fill in the connection settings:
    - **App Name**: `Slack Workspace`
-   - **Server URL**: `https://mcp-slack.ipv1337.dev/mcp`
+   - **Server URL**: `https://vitruvian-slack-mcp.ipv1337.dev/mcp`
    - **Authentication**: `OAuth 2.0` (Authorization Code flow)
    - **Authorization URL**: `https://auth.ipv1337.dev/oauth/v2/authorize`
    - **Token URL**: `https://auth.ipv1337.dev/oauth/v2/token`
    - **Client ID**: `<clientId>` *(from `pulumi stack output clientId` on `zitadel-apps-mcp-slack`)*
    - **Client Secret**: `<clientSecret>` *(from Zitadel app credentials)*
    - **Scope**: `openid offline_access urn:zitadel:iam:org:project:id:<projectId>:aud`
-   - **Redirect URI**: `https://oauth-redirect.googleusercontent.com/r/user_bound_custom-mcp-106163123583431838693-mcp-slack_ipv1337_dev`
+   - **Redirect URI**: `https://oauth-redirect.googleusercontent.com/r/user_bound_custom-mcp-106163123583431838693-vitruvian-slack-mcp_ipv1337_dev`
 3. Click **Connect & Authenticate** to log into Zitadel and grant consent.
 
 ---
 
 ## 🏛️ Two Usage Modes & Architecture
 
-`mcp-slack` supports two distinct operating modes designed for different execution environments and security boundaries:
+`vitruvian-slack-mcp` supports two distinct operating modes designed for different execution environments and security boundaries:
 
 | Property | Mode 1: Local Stdio Transport | Mode 2: Hosted Streamable HTTP Transport |
 |---|---|---|
@@ -437,7 +436,7 @@ sequenceDiagram
     autonumber
     actor Dev as Developer (James)
     participant IDE as Agent IDE (Antigravity / Claude)
-    participant Server as mcp-slack (stdio Process)
+    participant Server as vitruvian-slack-mcp (stdio Process)
     participant SlackAPI as Slack Web API
 
     Dev->>IDE: "Post update to #dev" / "Search my DMs"
@@ -457,7 +456,7 @@ sequenceDiagram
 
 ### Mode 2: Hosted Streamable HTTP Architecture (Gemini Spark Custom MCP App)
 
-In hosted HTTP mode, `mcp-slack` runs inside the Kubernetes cluster as an OAuth 2.0 Protected Resource Server. Gemini Spark discovers authentication requirements via RFC 9728 metadata, authenticates the user through Zitadel (`auth.ipv1337.dev`), and executes authorized Slack actions. With impersonation enabled (default), writes post as the authenticated human via the User Token; reads use the Bot Token.
+In hosted HTTP mode, `vitruvian-slack-mcp` runs inside the Kubernetes cluster as an OAuth 2.0 Protected Resource Server. Gemini Spark discovers authentication requirements via RFC 9728 metadata, authenticates the user through Zitadel (`auth.ipv1337.dev`), and executes authorized Slack actions. With impersonation enabled (default), writes post as the authenticated human via the User Token; reads use the Bot Token.
 
 ```mermaid
 sequenceDiagram
@@ -465,7 +464,7 @@ sequenceDiagram
     actor User as James
     participant Spark as Google Gemini Spark
     participant Envoy as Envoy Gateway / Ingress
-    participant Server as mcp-slack (K8s Pod)
+    participant Server as vitruvian-slack-mcp (K8s Pod)
     participant Zitadel as Zitadel IdP (auth.ipv1337.dev)
     participant SlackAPI as Slack Web API
 
@@ -499,5 +498,5 @@ sequenceDiagram
 ```
 
 ## Subdirectories & Boundaries
-- [rs](./rs/README.md): Subsystem blueprint grouping child modules under apps/mcp/slack/rs.
+- [rs](./rs/README.md): Subsystem blueprint grouping child modules under apps/mcp/vitruvian-slack-mcp/rs.
 

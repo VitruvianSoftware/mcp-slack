@@ -381,23 +381,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f9f8bd3e56ce4dfc153cf470fffbfa98c7620958b312ca5c3a4b8d5181fd13c6"
 
 [[package]]
-name = "mcp-slack"
-version = "0.0.0"
-dependencies = [
- "bytes",
- "http",
- "http-body-util",
- "hyper",
- "hyper-util",
- "ring",
- "rustls",
- "rustls-native-certs",
- "serde_json",
- "tokio",
- "ureq",
-]
-
-[[package]]
 name = "memchr"
 version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -767,6 +750,23 @@ name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
+
+[[package]]
+name = "vitruvian-slack-mcp"
+version = "0.0.0"
+dependencies = [
+ "bytes",
+ "http",
+ "http-body-util",
+ "hyper",
+ "hyper-util",
+ "ring",
+ "rustls",
+ "rustls-native-certs",
+ "serde_json",
+ "tokio",
+ "ureq",
+]
 
 [[package]]
 name = "wasi"

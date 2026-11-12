@@ -26,13 +26,13 @@
 image:
   # Digest, never a tag. A tag is a moving reference to an internet-facing
   # workload; a digest is the thing that was reviewed.
-  repository: ghcr.io/vitruviansoftware/mcp-slack
+  repository: ghcr.io/vitruviansoftware/vitruvian-slack-mcp
   digest: ""            # REQUIRED — sha256:...
   pullPolicy: IfNotPresent
 
 # Public hostname. Permanent name chosen deliberately rather than "-poc":
 # renaming later costs a DNS/HTTPRoute change plus reconfiguring the client.
-hostname: mcp-slack.ipv1337.dev
+hostname: vitruvian-slack-mcp.ipv1337.dev
 
 tunnel:
   # Cloudflare Tunnel UUID, from gitops/argocd/platform/cloudflared/configmap.yaml.
@@ -77,7 +77,7 @@ oidc:
   # on a wrong reason is one somebody proposes removing.
   #
   # Unset is a render failure, not "allow everyone" — and the server agrees:
-  # `parseSubjects` (mcp-slack/src/config.ts) throws when the list is empty on
+  # `parse_subjects` (apps/mcp/vitruvian-slack-mcp/rs/src/config.rs) fails when the list is empty on
   # the HTTP transport. Guarding it here too means the failure surfaces as a
   # refused render with this message, rather than as a CrashLoopBackOff that
   # reads like an application fault.
@@ -96,7 +96,7 @@ slack:
   # Comma-separated channel IDs forming the conversation allow-list.
   #
   # The chart template passes this value through as SLACK_CHANNEL_IDS without
-  # failing render when empty (`mcp-slack.channelIds` does not call `required`).
+  # failing render when empty (`vitruvian-slack-mcp.channelIds` does not call `required`).
   # Instead, the server enforces it at startup according to `userTokenEnabled`:
   # - When `userTokenEnabled` is false (the default bot-only mode), a non-empty
   #   list is required by the server: an empty value is refused at startup
@@ -194,7 +194,7 @@ terminationGracePeriodSeconds: 30
 # NO ALERTING VALUES HERE, AND THE OMISSION IS DELIBERATE.
 #
 # The sustained-5xx alert for this workload is real, and it lives in
-# gitops/argocd/platform/prometheus/applicationset.yaml under the `mcp-slack`
+# gitops/argocd/platform/prometheus/applicationset.yaml under the `vitruvian-slack-mcp`
 # rule group — not in this chart.
 #
 # This chart originally shipped it as a PrometheusRule, which was wrong: the

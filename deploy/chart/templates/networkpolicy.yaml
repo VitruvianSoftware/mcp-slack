@@ -57,7 +57,7 @@
 # allows, and widening to `matchPattern: "*"` does not help. Drop the block
 # and DNS resolves instantly — but then `toFQDNs` matches nothing, because the
 # proxy is what populates the FQDN→IP mapping, so :443 is blocked instead.
-# Both ways out are closed. Platform defect, not an mcp-slack one; the day it
+# Both ways out are closed. Platform defect, not a vitruvian-slack-mcp one; the day it
 # is fixed, this policy is the one that wants tightening.
 #
 # Worth knowing even then: `auth.ipv1337.dev` is a proxied CNAME, so the
@@ -82,7 +82,7 @@
 #
 # SCOPE OF THAT MEASUREMENT, so it is not read as more than it is: one node, a
 # busybox probe, seven checks plus a reverse control. NOT tested with the real
-# mcp-slack image, NOT under load, NOT across a node restart, NOT on a second
+# vitruvian-slack-mcp image, NOT under load, NOT across a node restart, NOT on a second
 # node.
 {{- /*
   GATED ON AN EXPLICIT VALUE, AND THE GATE NOW MEANS THE OPPOSITE THING.
@@ -93,7 +93,7 @@
   pod may reach the apiserver, other namespaces, Postgres and the relay.
 
   Narrower, and still a decision worth typing rather than defaulting: enabling
-  the app is a one-line rename of mcp-slack.yaml.disabled, so running an
+  the app is a one-line rename of vitruvian-slack-mcp.yaml.disabled, so running an
   internet-facing pod with no in-cluster containment should be a value someone
   chose, not a warning someone skipped. Aegis's finding 3 on #1420, kept for
   the new meaning rather than retired with the old one.
@@ -117,11 +117,11 @@
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: {{ include "mcp-slack.name" . }}-egress
-  labels: {{- include "mcp-slack.labels" . | nindent 4 }}
+  name: {{ include "vitruvian-slack-mcp.name" . }}-egress
+  labels: {{- include "vitruvian-slack-mcp.labels" . | nindent 4 }}
 spec:
   endpointSelector:
-    matchLabels: {{- include "mcp-slack.selectorLabels" . | nindent 6 }}
+    matchLabels: {{- include "vitruvian-slack-mcp.selectorLabels" . | nindent 6 }}
   egress:
     # DNS to kube-dns, with NO `rules.dns` block — and the omission is the
     # entire reason this policy works. A `rules.dns` block engages Cilium's L7

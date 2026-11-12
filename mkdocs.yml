@@ -18,10 +18,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-site_name: mcp-slack
-site_description: MCP server exposing Slack tools — Rust, published as a container image (ghcr.io/vitruviansoftware/mcp-slack)
+site_name: Vitruvian Slack MCP
+site_description: Vitruvian Slack MCP server exposing Slack tools — Rust, published as a container image (ghcr.io/vitruviansoftware/vitruvian-slack-mcp)
 repo_url: https://github.com/VitruvianSoftware/vitruvian-core
-edit_uri: edit/main/mcp-slack/docs
+edit_uri: edit/main/apps/mcp/vitruvian-slack-mcp/docs
 docs_dir: docs
 plugins:
   - techdocs-core

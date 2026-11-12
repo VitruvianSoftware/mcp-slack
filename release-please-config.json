@@ -5,10 +5,10 @@
   "include-v-in-tag": true,
   "tag-separator": "-",
   "packages": {
-    "apps/mcp/slack": {
+    "apps/mcp/vitruvian-slack-mcp": {
       "release-type": "simple",
-      "package-name": "@vitruviansoftware/mcp-slack",
-      "component": "mcp-slack",
+      "package-name": "@vitruviansoftware/vitruvian-slack-mcp",
+      "component": "vitruvian-slack-mcp",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         {

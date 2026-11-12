@@ -83,8 +83,8 @@ pub const SUPPORTED_PROTOCOL_VERSIONS: [&str; 5] = [
 /// What TS `close()` defaulted to; the chart overrides it via SHUTDOWN_GRACE_MS.
 pub const DEFAULT_SHUTDOWN_GRACE_MS: u64 = 10_000;
 
-/// The serverInfo the TS server hard-coded (index.ts).
-pub const SERVER_NAME: &str = "mcp-slack";
+/// The serverInfo advertised in MCP initialize responses.
+pub const SERVER_NAME: &str = "vitruvian-slack-mcp";
 pub const SERVER_VERSION: &str = "2.0.0";
 
 static STDERR_SINKS: Mutex<Vec<Arc<Mutex<Vec<String>>>>> = Mutex::new(Vec::new());
@@ -1024,7 +1024,7 @@ fn jsonrpc_http_error(
 
 fn internal_error(method: &Method, target: &str, detail: &str) -> Response<RespBody> {
     write_stderr(&format!(
-        "mcp-slack: unhandled error serving {method} {target}: {detail}\n"
+        "vitruvian-slack-mcp: unhandled error serving {method} {target}: {detail}\n"
     ));
     jsonrpc_http_error(500, -32603, "Internal server error", &[])
 }
@@ -1044,7 +1044,7 @@ fn auth_failure(error: &AuthError, metadata_url: &str) -> Response<RespBody> {
             None => String::new(),
         };
         write_stderr(&format!(
-            "mcp-slack: refused {code}{presented_part}: {}\n",
+            "vitruvian-slack-mcp: refused {code}{presented_part}: {}\n",
             header_safe(&msg)
         ));
     }
@@ -1330,7 +1330,7 @@ where
 {
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
-        .thread_name("mcp-slack-http")
+        .thread_name("vitruvian-slack-mcp-http")
         .build()
         .map_err(|e| format!("Failed to start the HTTP runtime: {e}"))?;
 
@@ -1742,7 +1742,9 @@ async fn handle_post(
                 Ok(message) => message,
                 Err(join) => {
                     let detail = panic_message(join);
-                    write_stderr(&format!("mcp-slack: request handler panicked: {detail}\n"));
+                    write_stderr(&format!(
+                        "vitruvian-slack-mcp: request handler panicked: {detail}\n"
+                    ));
                     error_message(&id_for_error, -32603, &detail)
                 }
             };
@@ -2075,7 +2077,7 @@ mod tests {
                 "GET",
                 "/.well-known/oauth-protected-resource/mcp",
                 &[
-                    ("x-forwarded-host", "mcp-slack.ipv1337.dev"),
+                    ("x-forwarded-host", "vitruvian-slack-mcp.ipv1337.dev"),
                     ("cf-visitor", "{\"scheme\":\"https\"}"),
                 ],
                 "",
@@ -2085,7 +2087,7 @@ mod tests {
             let data = JsonValue::parse(&res.body).unwrap();
             assert_eq!(
                 data.get("resource").and_then(|v| v.as_str()),
-                Some("https://mcp-slack.ipv1337.dev/mcp")
+                Some("https://vitruvian-slack-mcp.ipv1337.dev/mcp")
             );
         });
     }
@@ -2276,7 +2278,7 @@ mod tests {
             let lines = capture.lines();
             let refusal = lines.iter().find(|l| l.contains("refused")).unwrap();
             assert!(
-                refusal.starts_with("mcp-slack: refused insufficient_scope: "),
+                refusal.starts_with("vitruvian-slack-mcp: refused insufficient_scope: "),
                 "{refusal}"
             );
         }
@@ -2305,7 +2307,7 @@ mod tests {
                 assert_eq!(res.status, 200);
                 assert_eq!(
                     res.body,
-                    "event: message\ndata: {\"result\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"mcp-slack\",\"version\":\"2.0.0\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
+                    "event: message\ndata: {\"result\":{\"protocolVersion\":\"2025-11-25\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"vitruvian-slack-mcp\",\"version\":\"2.0.0\"}},\"jsonrpc\":\"2.0\",\"id\":1}\n\n"
                 );
             }
         });

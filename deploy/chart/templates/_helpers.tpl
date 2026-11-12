@@ -20,16 +20,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */}}
 
-{{- define "mcp-slack.name" -}}mcp-slack{{- end -}}
+{{- define "vitruvian-slack-mcp.name" -}}vitruvian-slack-mcp{{- end -}}
 
-{{- define "mcp-slack.labels" -}}
-app.kubernetes.io/name: {{ include "mcp-slack.name" . }}
+{{- define "vitruvian-slack-mcp.labels" -}}
+app.kubernetes.io/name: {{ include "vitruvian-slack-mcp.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
-{{- define "mcp-slack.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "mcp-slack.name" . }}
+{{- define "vitruvian-slack-mcp.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "vitruvian-slack-mcp.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
@@ -46,25 +46,25 @@ project id is not "skip the audience check" — both are refusals.
 deployment that renders, syncs, reports Healthy, and is wrong.
 */}}
 
-{{- define "mcp-slack.imageRef" -}}
+{{- define "vitruvian-slack-mcp.imageRef" -}}
 {{- $raw := required "image.digest is required — pin the image by digest, never a tag. An internet-facing workload must run the artifact that was reviewed, not whatever the tag points at today." .Values.image.digest -}}
 {{- $d := regexReplaceAll "^.*@" $raw "" -}}
 {{ .Values.image.repository }}@{{ $d }}
 {{- end -}}
 
-{{- define "mcp-slack.projectId" -}}
+{{- define "vitruvian-slack-mcp.projectId" -}}
 {{ required "oidc.projectId is required — take it from `pulumi stack output projectId` on the zitadel-apps-mcp-slack stack. It is the audience the server validates against, so a wrong or absent value is the boundary, not a setting." .Values.oidc.projectId }}
 {{- end -}}
 
-{{- define "mcp-slack.allowedSubjects" -}}
+{{- define "vitruvian-slack-mcp.allowedSubjects" -}}
 {{ required "oidc.allowedSubjects is required — comma-separated Zitadel subjects (numeric user ids). This is the only identity check made per request; the audience check is not one, because `aud` is caller-authored and every account this instance issues a token to can put this project in it. Refusing to render is correct: an empty subject list would admit the whole instance, which today is anyone who can self-register." .Values.oidc.allowedSubjects }}
 {{- end -}}
 
-{{- define "mcp-slack.allowedClientId" -}}
+{{- define "vitruvian-slack-mcp.allowedClientId" -}}
 {{ required "oidc.clientId is required (#1491) — take it from `pulumi stack output clientId` on the zitadel-apps-mcp-slack stack. It pins the caller to this server's own OIDC client, which closes a gap oidc.allowedSubjects cannot: Zitadel documents the audience-granting scope as requestable by any client without checking the requesting user's grants, so a listed subject who authenticates to a different client still passes the audience check and the subject check above." .Values.oidc.clientId }}
 {{- end -}}
 
-{{- define "mcp-slack.channelIds" -}}
+{{- define "vitruvian-slack-mcp.channelIds" -}}
 {{ .Values.slack.channelIds }}
 {{- end -}}
 
@@ -77,7 +77,7 @@ zero or negative budget, which would either disable the drain or be coerced
 into something meaningless — the fail-open-on-an-uninterpretable-value shape
 this chart refuses everywhere else. Refusing to render is the honest outcome.
 */}}
-{{- define "mcp-slack.shutdownGraceMs" -}}
+{{- define "vitruvian-slack-mcp.shutdownGraceMs" -}}
 {{- $g := int .Values.terminationGracePeriodSeconds -}}
 {{- if lt $g 3 -}}
 {{- fail (printf "terminationGracePeriodSeconds is %d, which leaves no room for the in-process drain. SHUTDOWN_GRACE_MS is derived as (grace - 2s); at %ds that is zero or negative, so the drain would be disabled while appearing configured. Use at least 3." $g $g) -}}

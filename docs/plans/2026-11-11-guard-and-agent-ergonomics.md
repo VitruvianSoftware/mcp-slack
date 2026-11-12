@@ -1,16 +1,16 @@
 ---
 status: completed
 ---
-# mcp-slack: close allow-list gaps, then make agents' lives easier (PR 1)
+# vitruvian-slack-mcp: close allow-list gaps, then make agents' lives easier (PR 1)
 
 Source: two independent reviews (Fable 5.1, Gemini 4 Carbon) on 2026-11-11, verified against the code by the lead.
-Rust sources: apps/mcp/slack/rs/src/. Tests live inline (`#[cfg(test)]`) and run with
-`bazel test //apps/mcp/slack:all`. No new Slack scopes. No tool renamed or removed; existing arguments keep working.
+Rust sources: apps/mcp/vitruvian-slack-mcp/rs/src/. Tests live inline (`#[cfg(test)]`) and run with
+`bazel test //apps/mcp/vitruvian-slack-mcp:all`. No new Slack scopes. No tool renamed or removed; existing arguments keep working.
 
 ## Decision: production endpoint
 The public HTTP endpoint stays as configured (no allow-list, user token, posts as James). It is reachable only
 by James's Zitadel identity. This PR makes the allow-list actually hold WHEN it is set, and keeps destructive
-tools off HTTP unless explicitly enabled. Do not change gitops/argocd/platform/mcp-slack/values.yaml values.
+tools off HTTP unless explicitly enabled. Do not change gitops/argocd/platform/vitruvian-slack-mcp/values.yaml values.
 
 ## A. Security (do first, each with a test that fails before the fix)
 A1. Bot->user read fallback. `SlackClient::api()` (slack_client.rs ~591-597) silently retries a bot call with the
@@ -27,9 +27,9 @@ A5. Destructive tools on HTTP: new const `HTTP_WITHHELD_DESTRUCTIVE` in tools.rs
     slack_set_user_group_enabled, slack_set_user_group_members]. Withheld (not listed AND refused if called) on
     HTTP unless env `SLACK_HTTP_ALLOW_DESTRUCTIVE` is `true`/`1`. stdio unaffected. Wire it like the existing
     HTTP_WITHHELD_* lists and through config.rs. Add the env to the Helm chart as an optional value
-    (apps/mcp/slack/deploy/chart: values.yaml default false, deployment.yaml env) — default off.
+    (apps/mcp/vitruvian-slack-mcp/deploy/chart: values.yaml default false, deployment.yaml env) — default off.
 A6. Stale text (no behaviour): manifest.remote.json long_description claims HTTP refuses a user token; chart
-    deployment.yaml (~130-133, ~146-149) and gitops/argocd/applications/mcp-slack.yaml comments say the same.
+    deployment.yaml (~130-133, ~146-149) and gitops/argocd/applications/vitruvian-slack-mcp.yaml comments say the same.
     Make them describe reality: user token optional on HTTP; with it the allow-list is optional.
 
 ## B. Paging and history
@@ -80,7 +80,7 @@ ownership check via whoami), channel admin, bookmarks edit/remove, mentions inbo
 ## AMENDMENT 2026-11-11 18:30 — no behaviour change for existing users (overrides A5, B1, B2, C above)
 James's rule: his current experience must not change. Everything new is additive or opt-in.
 - A5: keep the HTTP_WITHHELD_DESTRUCTIVE mechanism and the chart value (default false for NEW installs), BUT set
-  `SLACK_HTTP_ALLOW_DESTRUCTIVE: true` for the existing deployment in gitops/argocd/platform/mcp-slack/values.yaml
+  `SLACK_HTTP_ALLOW_DESTRUCTIVE: true` for the existing deployment in gitops/argocd/platform/vitruvian-slack-mcp/values.yaml
   (add the key; do not touch other values), so the live endpoint keeps offering the same tools.
 - B1: `include_activity` defaults to TRUE (today's behaviour: join/leave notices included). Agents can pass false.
 - B2: send `limit` to Slack only when the caller passes it (no new default of 50).

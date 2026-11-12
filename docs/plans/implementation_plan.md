@@ -1,7 +1,7 @@
-# Extend `mcp-slack` for Gemini Spark Custom App Support
+# Extend `vitruvian-slack-mcp` for Gemini Spark Custom App Support
 
 ## Overview
-We will adapt and extend the hosted HTTP transport of `mcp-slack` so that it seamlessly connects to Google Gemini Spark as a custom MCP application over Streamable HTTP and OAuth 2.0, mirroring the successful integration pattern we implemented for Backstage MCP.
+We will adapt and extend the hosted HTTP transport of `vitruvian-slack-mcp` so that it seamlessly connects to Google Gemini Spark as a custom MCP application over Streamable HTTP and OAuth 2.0, mirroring the successful integration pattern we implemented for Backstage MCP.
 
 ---
 
@@ -12,14 +12,14 @@ Gemini Spark requires specific protocol handshakes when connecting to an OAuth-p
    - Gemini probes `GET /.well-known/oauth-protected-resource` or `GET /.well-known/oauth-protected-resource/mcp`.
    - The response must return HTTP 200 with JSON describing the resource URI, authorization servers (`https://auth.ipv1337.dev`), and supported scopes.
 2. **RFC 6750 / RFC 9728 `WWW-Authenticate` Header on 401 Responses**:
-   - When `/mcp` is called without credentials or with an invalid token, the HTTP 401 response must include `WWW-Authenticate: Bearer error="...", error_description="...", resource_metadata="https://mcp-slack.ipv1337.dev/.well-known/oauth-protected-resource/mcp"`.
+   - When `/mcp` is called without credentials or with an invalid token, the HTTP 401 response must include `WWW-Authenticate: Bearer error="...", error_description="...", resource_metadata="https://vitruvian-slack-mcp.ipv1337.dev/.well-known/oauth-protected-resource/mcp"`.
 3. **Gateway Routing**:
    - The Kubernetes Gateway API `HTTPRoute` must route both `/mcp` and `/.well-known/oauth-protected-resource` through to the pod.
 4. **Zitadel OIDC Client**:
    - The Zitadel OIDC client must issue JWT access tokens (`OIDC_TOKEN_TYPE_JWT`) and accept Gemini Spark's callback redirect URI (`https://oauth-redirect.googleusercontent.com/r/...`).
 5. **Tool Naming & Schema Strictness**:
    - Tool names must strictly match `^[a-zA-Z0-9_]{1,64}$` (all 10 HTTP-advertised `slack_*` tools already satisfy this).
-   - Input schemas must avoid `anyOf`/`oneOf`/unions (all `mcp-slack` schemas are clean standard JSON schemas).
+   - Input schemas must avoid `anyOf`/`oneOf`/unions (all `vitruvian-slack-mcp` schemas are clean standard JSON schemas).
 
 ---
 
@@ -31,12 +31,12 @@ sequenceDiagram
     actor User as James
     participant Spark as Gemini Spark
     participant Envoy as Envoy Gateway
-    participant SlackMCP as mcp-slack Pod
+    participant SlackMCP as vitruvian-slack-mcp Pod
     participant Zitadel as Zitadel IdP (auth.ipv1337.dev)
 
     Note over Spark,SlackMCP: 1. Server Validation & Metadata Discovery
     Spark->>Envoy: GET /.well-known/oauth-protected-resource/mcp
-    Envoy->>SlackMCP: Route to mcp-slack
+    Envoy->>SlackMCP: Route to vitruvian-slack-mcp
     SlackMCP-->>Spark: 200 OK (RFC 9728 JSON: resource, authorization_servers, scopes)
 
     Note over Spark,Zitadel: 2. OAuth 2.0 Authorization Flow (PKCE)
@@ -49,7 +49,7 @@ sequenceDiagram
 
     Note over Spark,SlackMCP: 3. MCP Session Initialization & Tool Invocations
     Spark->>Envoy: POST /mcp (Initialize / tools/list) with Bearer JWT
-    Envoy->>SlackMCP: Route to mcp-slack
+    Envoy->>SlackMCP: Route to vitruvian-slack-mcp
     SlackMCP->>SlackMCP: Verify JWT via JWKS (audience, sub, client_id)
     SlackMCP-->>Spark: 200 OK (Streamable HTTP tools/list: 10 Slack tools)
 ```
@@ -58,25 +58,25 @@ sequenceDiagram
 
 ## Proposed Changes
 
-### Component 1: `mcp-slack` Server (`apps/mcp/slack/src/`)
+### Component 1: `vitruvian-slack-mcp` Server (`apps/mcp/vitruvian-slack-mcp/src/`)
 
-#### [MODIFY] [httpTransport.ts](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/src/httpTransport.ts)
+#### [MODIFY] [httpTransport.ts](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/src/httpTransport.ts)
 - Add handler for RFC 9728 discovery endpoint `/.well-known/oauth-protected-resource` and `/.well-known/oauth-protected-resource/mcp`.
 - Update `writeAuthFailure()` to inject `resource_metadata="https://<host>/.well-known/oauth-protected-resource/mcp"` in the `WWW-Authenticate` header on HTTP 401.
 - Ensure endpoint returns supported scopes (`openid`, `offline_access`, `urn:zitadel:iam:org:project:id:<projectId>:aud`) and authorization servers (`[config.issuer]`).
 
-#### [MODIFY] [httpTransport.test.ts](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/__tests__/httpTransport.test.ts)
+#### [MODIFY] [httpTransport.test.ts](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/__tests__/httpTransport.test.ts)
 - Add unit tests for `/.well-known/oauth-protected-resource` and `/.well-known/oauth-protected-resource/mcp` returning valid RFC 9728 JSON without authentication.
 - Add assertions verifying `WWW-Authenticate` header includes `resource_metadata` on 401 rejections.
 
 ---
 
-### Component 2: Helm Chart & Ingress (`apps/mcp/slack/deploy/chart/`)
+### Component 2: Helm Chart & Ingress (`apps/mcp/vitruvian-slack-mcp/deploy/chart/`)
 
-#### [MODIFY] [httproute.yaml](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/deploy/chart/templates/httproute.yaml)
+#### [MODIFY] [httproute.yaml](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/deploy/chart/templates/httproute.yaml)
 - Add a rule matching `/.well-known/oauth-protected-resource` prefix alongside `/mcp` so Envoy Gateway forwards metadata discovery requests to the pod.
 
-#### [MODIFY] [values.yaml](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/slack/deploy/chart/values.yaml)
+#### [MODIFY] [values.yaml](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/apps/mcp/vitruvian-slack-mcp/deploy/chart/values.yaml)
 - Document the well-known discovery path and any relevant metadata defaults.
 
 ---
@@ -86,14 +86,14 @@ sequenceDiagram
 #### [MODIFY] [main.go](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/infrastructure/pulumi/platform/zitadel-apps-mcp-slack/main.go)
 - Update `RedirectUris` in `ApplicationOidcArgs` to include:
   - `https://vertexaisearch.cloud.google.com/oauth-redirect`
-  - `https://oauth-redirect.googleusercontent.com/r/user_bound_custom-mcp-106163123583431838693-mcp-slack_ipv1337_dev`
+  - `https://oauth-redirect.googleusercontent.com/r/user_bound_custom-mcp-106163123583431838693-vitruvian-slack-mcp_ipv1337_dev`
   - Generic/standard Google Cloud OAuth redirect URIs.
 
 ---
 
 ### Component 4: GitOps Deployment (`gitops/argocd/applications/`)
 
-#### [MODIFY] [mcp-slack.yaml.disabled](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/gitops/argocd/applications/mcp-slack.yaml.disabled)
+#### [MODIFY] [vitruvian-slack-mcp.yaml](file:///Users/james/Workspace/gh/application/vitruvian/vitruvian-core/gitops/argocd/applications/vitruvian-slack-mcp.yaml)
 - Prepare the Application manifest with required values:
   - `oidc.projectId`, `oidc.clientId`, `oidc.allowedSubjects`, `networkPolicy.enabled: true`.
 - Ready for activation when Slack bot tokens & channels are set up.
@@ -112,7 +112,7 @@ sequenceDiagram
 ## Verification Plan
 
 ### Automated Tests
-- Run `pnpm test` in `apps/mcp/slack` (all 6 test suites, 134+ tests).
+- Run tests in `apps/mcp/vitruvian-slack-mcp`.
 - Run `bazel test //...` across the monorepo.
 - Run `bazel run //:tidy` and format checks.
 - Run Helm chart rendering checks (`helm template`).

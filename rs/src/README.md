@@ -1,7 +1,7 @@
 # Src
 
 ## Overview
-Component package providing implementation for `apps/mcp/slack/rs/src`.
+Component package providing implementation for `apps/mcp/vitruvian-slack-mcp/rs/src`.
 
 ## Interface
 - `[auth.rs:AuthError]`
@@ -50,4 +50,4 @@ Component package providing implementation for `apps/mcp/slack/rs/src`.
 - [dispatch.rs:268]: `&str_arg(args, "query")?,`
 
 ## Verification
-- Run: `bazel test //apps/mcp/slack/rs/src/...`
+- Run: `bazel test //apps/mcp/vitruvian-slack-mcp:vitruvian_slack_mcp_test`

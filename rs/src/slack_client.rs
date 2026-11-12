@@ -2901,7 +2901,7 @@ mod tests {
 
             // Download file to temp path and refuse overwrite
             let tmp_dir = std::env::temp_dir().join(format!(
-                "mcp-slack-rs-dl-{}",
+                "vitruvian-slack-mcp-rs-dl-{}",
                 std::time::SystemTime::now()
                     .duration_since(std::time::UNIX_EPOCH)
                     .unwrap()
@@ -3884,7 +3884,7 @@ mod tests {
             b"abc",
         );
         let dir = std::env::temp_dir().join(format!(
-            "mcp-slack-rs-noname-{}",
+            "vitruvian-slack-mcp-rs-noname-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()

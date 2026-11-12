@@ -20,11 +20,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "mcp-slack.name" . }}
-  labels: {{- include "mcp-slack.labels" . | nindent 4 }}
+  name: {{ include "vitruvian-slack-mcp.name" . }}
+  labels: {{- include "vitruvian-slack-mcp.labels" . | nindent 4 }}
 spec:
   type: ClusterIP
-  selector: {{- include "mcp-slack.selectorLabels" . | nindent 4 }}
+  selector: {{- include "vitruvian-slack-mcp.selectorLabels" . | nindent 4 }}
   ports:
     - name: http
       port: 80

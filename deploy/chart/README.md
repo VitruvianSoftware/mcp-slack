@@ -1,6 +1,6 @@
-# mcp-slack Helm chart
+# Vitruvian Slack MCP Helm chart
 
-Deploys the Slack MCP server on the dev-local k3s cluster as an
+Deploys the Vitruvian Slack MCP server on the dev-local k3s cluster as an
 internet-facing, auth-gated endpoint for Google Gemini Spark.
 
 This is the Phase 2b deliverable. The chart is written against acceptance
@@ -47,7 +47,7 @@ disclosure, not a wider-than-intended public read.
 produce a deployment that renders, syncs, reports Healthy, and is wrong.
 
 ```bash
-helm template mcp-slack apps/mcp/slack/deploy/chart \
+helm template vitruvian-slack-mcp apps/mcp/vitruvian-slack-mcp/deploy/chart \
   --set image.digest=sha256:… \
   --set oidc.projectId=… \
   --set slack.channelIds=C…,C…
@@ -87,7 +87,7 @@ pod. This policy is the layer that still holds in that case.
 > was reverted** (`cecb67b7`, revert `ec08150b`). That policy denied apiserver
 > egress because it allowed the apiserver's *endpoint* IPs while traffic
 > actually goes to the ClusterIP; leader election failed every ~8s.
-> mcp-slack never talks to the apiserver, so that exact failure is not in this
+> vitruvian-slack-mcp never talks to the apiserver, so that exact failure is not in this
 > workload's path — but the policy is **reviewed and unexercised** against live
 > cluster behaviour, and the revert's own instruction was to validate before
 > re-merge. Treat it as unproven until a live preview says otherwise.
@@ -125,7 +125,7 @@ file's omission alone.
 
 The sustained-5xx alert lives in
 `gitops/argocd/platform/prometheus/applicationset.yaml`, rule group
-`mcp-slack`.
+`vitruvian-slack-mcp`.
 
 It is not in this chart, and the reason is worth knowing before you try to
 "fix" that. This cluster runs the plain `prometheus` chart: there is **no
@@ -191,7 +191,7 @@ The division is clean — but it is a division, not redundancy.
 
 ### Two alerts, not one
 
-`McpSlackIdpUnavailable` alerts on the **503 rate directly**, with no
+`VitruvianSlackMcpIdpUnavailable` alerts on the **503 rate directly**, with no
 denominator, so nothing can go NaN. It complements the ratio rather than
 duplicating it: the ratio answers "of what we answered, most failed", this one
 answers "we could not reach the IdP".
@@ -235,16 +235,16 @@ is permanently silent while still looking present.
 
 ## Deployment
 
-Via ArgoCD: `gitops/argocd/applications/mcp-slack.yaml.disabled`, git-source
-Helm, scoped to `mcp-slack-project`. It ships **disabled** — see that file's
-header for the four preconditions to enabling it.
+Via ArgoCD: `gitops/argocd/applications/vitruvian-slack-mcp.yaml`, git-source
+Helm, scoped to `vitruvian-slack-mcp-project`. See that file's
+header for the preconditions to running it.
 
 ## Validation
 
 ```bash
 # renders with values, and refuses without them
-helm template mcp-slack apps/mcp/slack/deploy/chart --set image.digest=… …
-helm lint apps/mcp/slack/deploy/chart --set …
+helm template vitruvian-slack-mcp apps/mcp/vitruvian-slack-mcp/deploy/chart --set image.digest=… …
+helm lint apps/mcp/vitruvian-slack-mcp/deploy/chart --set …
 
 # the alert rules (all groups, not just this one)
 promtool check rules <extracted alerting_rules.yml>

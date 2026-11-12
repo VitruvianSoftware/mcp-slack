@@ -451,7 +451,7 @@ this check exists to enforce."
         ))
         .redirects(0)
         .tls_config(crate::tls::client_config())
-        .user_agent("mcp-slack")
+        .user_agent("vitruvian-slack-mcp")
         .build();
 
     Ok(StandardTokenVerifier {

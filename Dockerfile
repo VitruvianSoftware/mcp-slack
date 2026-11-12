@@ -20,26 +20,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# Container image for the mcp-slack HTTP transport, consumed by
-# deploy/chart (gitops/argocd/applications/mcp-slack.yaml -> image.digest).
+# Container image for the vitruvian-slack-mcp HTTP transport, consumed by
+# deploy/chart (gitops/argocd/applications/vitruvian-slack-mcp.yaml -> image.digest).
 #
-# THIS IMAGE IS BUILT FROM SOURCE, NEVER FROM THE npm PACKAGE, and that is a
-# correctness requirement rather than a preference: `npm i
-# @vitruviansoftware/mcp-slack` resolves to 1.0.3 (2026-05-07) and SUCCEEDS —
-# a build three months stale that predates the HTTP transport, the OIDC auth
-# layer and the channel allow-list entirely. Every release since failed in the
-# mirror's release.yml, so the registry never moved while the tags did. An
-# image built from that package would start, pass its probes, and be the wrong
-# program.
+# THIS IMAGE IS BUILT FROM SOURCE, NEVER FROM AN npm PACKAGE, and that is a
+# correctness requirement rather than a preference: the legacy npm package
+# stopped updating before the HTTP transport, the OIDC auth layer and the
+# channel allow-list existed. An image built from a stale registry artifact
+# would start, pass its probes, and be the wrong program.
 #
-# The build context is THIS directory, so `docker build mcp-slack/` works in
+# The build context is THIS directory, so `docker build apps/mcp/vitruvian-slack-mcp/` works in
 # the monorepo and in the one-way standalone mirror alike (the mirror only ever
 # receives this subtree). That is why the server keeps its own Cargo.lock in
 # rs/ rather than using the repo's root one.
 #
 # The server is Rust. The build stage compiles it with `cargo build --locked`,
 # so the image holds exactly the crate versions in rs/Cargo.lock, the ones
-# Bazel builds and tests (@mcp_slack_crates) and nothing re-resolved here.
+# Bazel builds and tests (@vitruvian_slack_mcp_crates) and nothing re-resolved here.
 # The runtime is distroless: glibc, the CA bundle the HTTPS client trusts for
 # Slack and the issuer, and the binary. No shell, no package manager, no Node.
 
@@ -48,8 +45,8 @@ FROM rust:1.85-slim-bookworm AS build
 WORKDIR /src
 COPY rs/Cargo.toml rs/Cargo.lock ./
 COPY rs/src ./src
-RUN cargo build --release --locked --bin mcp-slack && \
-    install -m 0755 target/release/mcp-slack /mcp-slack
+RUN cargo build --release --locked --bin vitruvian-slack-mcp && \
+    install -m 0755 target/release/vitruvian-slack-mcp /vitruvian-slack-mcp
 
 # --- Runtime stage --------------------------------------------------------------
 # cc-debian12 matches the build stage's bookworm glibc and ships
@@ -66,7 +63,7 @@ ENV PORT=3000 \
     MCP_TRANSPORT=http \
     HOME=/tmp
 
-COPY --from=build --chmod=0755 /mcp-slack /app/mcp-slack
+COPY --from=build --chmod=0755 /vitruvian-slack-mcp /app/vitruvian-slack-mcp
 
 # The pod overrides USER with `runAsUser: 10001` (deploy/chart deployment.yaml),
 # a UID that exists in no image layer. Everything the process reads must
@@ -86,7 +83,7 @@ EXPOSE 3000
 # liveness/readiness probes instead. Adding one would mean shipping `curl` in
 # the runtime layer of an internet-facing pod that holds a Slack bot token,
 # which is attack surface bought for nothing.
-CMD ["/app/mcp-slack"]
+CMD ["/app/vitruvian-slack-mcp"]
 
 # Provenance. `org.opencontainers.image.revision` is the ONLY reliable
 # digest -> commit tie available here: no AR or GHCR repository in this org
@@ -100,8 +97,8 @@ CMD ["/app/mcp-slack"]
 # keeps a revision change from invalidating the dependency and compile layers
 # above it on every commit.
 ARG GIT_REVISION=unknown
-LABEL org.opencontainers.image.title="mcp-slack" \
-      org.opencontainers.image.description="Slack MCP server (HTTP transport, OIDC-authenticated)" \
+LABEL org.opencontainers.image.title="vitruvian-slack-mcp" \
+      org.opencontainers.image.description="Vitruvian Slack MCP server (HTTP transport, OIDC-authenticated)" \
       org.opencontainers.image.source="https://github.com/VitruvianSoftware/vitruvian-core" \
       org.opencontainers.image.licenses="MIT" \
       org.opencontainers.image.revision="${GIT_REVISION}"

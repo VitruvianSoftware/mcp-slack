@@ -43,13 +43,13 @@ pub mod tls {
             .get_or_init(|| {
                 let loaded = rustls_native_certs::load_native_certs();
                 for err in &loaded.errors {
-                    eprintln!("mcp-slack: could not read a system CA certificate: {err}");
+                    eprintln!("vitruvian-slack-mcp: could not read a system CA certificate: {err}");
                 }
                 let mut roots = rustls::RootCertStore::empty();
                 let (added, _unparsable) = roots.add_parsable_certificates(loaded.certs);
                 if added == 0 {
                     eprintln!(
-                        "mcp-slack: no CA certificates found; every HTTPS call (Slack, the issuer) will fail"
+                        "vitruvian-slack-mcp: no CA certificates found; every HTTPS call (Slack, the issuer) will fail"
                     );
                 }
                 let provider = Arc::new(rustls::crypto::ring::default_provider());

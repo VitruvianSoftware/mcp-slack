@@ -19,9 +19,9 @@
 # SOFTWARE.
 
 apiVersion: v2
-name: mcp-slack
+name: vitruvian-slack-mcp
 description: >-
-  Remote HTTP transport for the mcp-slack MCP server — the internet-facing half
+  Remote HTTP transport for the Vitruvian Slack MCP server — the internet-facing half
   of the Gemini Spark integration. The stdio path (the same image, run locally
   with `docker run -i`) is not deployed by this chart.
 type: application
@@ -35,7 +35,7 @@ type: application
 # CONSTRUCTION. Asking nobody to wire it is the weaker half; the mechanism does
 # the work. Adding the marker here is what would break it.
 version: 0.1.0
-# The APP version, and it must track mcp-slack/version.txt or it lies about
+# The APP version, and it must track apps/mcp/vitruvian-slack-mcp/version.txt or it lies about
 # what the chart ships. It said "0.1.0" while the app was on 1.7.0, because
 # release-please bumps version.txt and had no reason to look in here.
 #
@@ -56,7 +56,7 @@ version: 0.1.0
 # The trailing marker below is what keeps it honest: release-please rewrites the
 # version on any line carrying that marker, so appVersion now moves with the
 # release instead of waiting for someone to notice. Wired via `extra-files` in
-# mcp-slack/release-please-config.json; same mechanism as the precedent at
+# apps/mcp/vitruvian-slack-mcp/release-please-config.json; same mechanism as the precedent at
 # apps/desktop/vitruvian-code/macos/Sources/VitruvianCode/Version.swift.
 #
 # Deliberately NOT spelling the marker out anywhere in this comment block. The

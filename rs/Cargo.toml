@@ -18,14 +18,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# The Slack MCP server.
+# The Vitruvian Slack MCP server.
 #
 # Its own workspace and its own Cargo.lock, deliberately apart from the root
-# one: the image is built from apps/mcp/slack alone (the Dockerfile's context,
+# one: the image is built from apps/mcp/vitruvian-slack-mcp alone (the Dockerfile's context,
 # and all the standalone mirror receives), so the lock has to live in here for
 # `cargo build --locked` to work. Bazel reads the same lock through the
-# @mcp_slack_crates hub (MODULE.bazel). Re-lock with
-#   bazel run //tools/crates:lock -- --dir apps/mcp/slack/rs
+# @vitruvian_slack_mcp_crates hub (MODULE.bazel). Re-lock with
+#   bazel run //tools/crates:lock -- --dir apps/mcp/vitruvian-slack-mcp/rs
 #
 # Everything that touches the network or crypto is a vetted crate, never
 # hand-rolled: hyper/tokio serve HTTP, ureq over rustls makes every HTTPS call
@@ -35,18 +35,18 @@
 [workspace]
 
 [package]
-name = "mcp-slack"
+name = "vitruvian-slack-mcp"
 version = "0.0.0"
 edition = "2021"
 rust-version = "1.75"
 publish = false
 
 [lib]
-name = "mcp_slack_rs_lib"
+name = "vitruvian_slack_mcp_rs_lib"
 path = "src/lib.rs"
 
 [[bin]]
-name = "mcp-slack"
+name = "vitruvian-slack-mcp"
 path = "src/main.rs"
 
 [dependencies]

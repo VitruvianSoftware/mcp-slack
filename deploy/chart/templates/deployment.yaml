@@ -20,15 +20,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mcp-slack.name" . }}
-  labels: {{- include "mcp-slack.labels" . | nindent 4 }}
+  name: {{ include "vitruvian-slack-mcp.name" . }}
+  labels: {{- include "vitruvian-slack-mcp.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
-    matchLabels: {{- include "mcp-slack.selectorLabels" . | nindent 6 }}
+    matchLabels: {{- include "vitruvian-slack-mcp.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      labels: {{- include "mcp-slack.selectorLabels" . | nindent 8 }}
+      labels: {{- include "vitruvian-slack-mcp.selectorLabels" . | nindent 8 }}
     spec:
       # Inert until the process installs a SIGTERM handler — without one Node
       # exits immediately and this only delays SIGKILL rather than draining.
@@ -65,8 +65,8 @@ spec:
         seccompProfile:
           type: RuntimeDefault
       containers:
-        - name: mcp-slack
-          image: {{ include "mcp-slack.imageRef" . }}
+        - name: vitruvian-slack-mcp
+          image: {{ include "vitruvian-slack-mcp.imageRef" . }}
           # Wired rather than dropped. It sat in values.yaml reading like
           # policy and doing nothing — the same "looks like coverage, is
           # inert" shape as the PrometheusRule, with a smaller blast radius.
@@ -91,7 +91,7 @@ spec:
             # the drain is decorative: the kubelet wins the race and kills
             # in-flight requests the drain existed to protect.
             - name: SHUTDOWN_GRACE_MS
-              value: {{ include "mcp-slack.shutdownGraceMs" . | quote }}
+              value: {{ include "vitruvian-slack-mcp.shutdownGraceMs" . | quote }}
             - name: MCP_TRANSPORT
               value: http
             - name: PORT
@@ -102,7 +102,7 @@ spec:
             # project id would silently defeat the per-project audience
             # isolation that the dedicated Zitadel project exists to provide.
             - name: OIDC_PROJECT_ID
-              value: {{ include "mcp-slack.projectId" . | quote }}
+              value: {{ include "vitruvian-slack-mcp.projectId" . | quote }}
             # The per-request identity check. OIDC_PROJECT_ID above is NOT one:
             # `aud` is caller-authored, so issuer + audience admit every account
             # this Zitadel instance will issue a token to. This list is what
@@ -110,7 +110,7 @@ spec:
             # start without it — the chart refuses to render, so the failure
             # names the missing value instead of arriving as CrashLoopBackOff.
             - name: OIDC_ALLOWED_SUBJECTS
-              value: {{ include "mcp-slack.allowedSubjects" . | quote }}
+              value: {{ include "vitruvian-slack-mcp.allowedSubjects" . | quote }}
             # Pins the caller to this server's own OIDC client (#1491). Closes
             # what OIDC_ALLOWED_SUBJECTS above cannot: a listed subject who
             # authenticates to a DIFFERENT client in the instance and picks up
@@ -118,9 +118,9 @@ spec:
             # subject checks, so this is what actually narrows the caller to
             # the intended app.
             - name: OIDC_ALLOWED_CLIENT_ID
-              value: {{ include "mcp-slack.allowedClientId" . | quote }}
+              value: {{ include "vitruvian-slack-mcp.allowedClientId" . | quote }}
             - name: SLACK_CHANNEL_IDS
-              value: {{ include "mcp-slack.channelIds" . | quote }}
+              value: {{ include "vitruvian-slack-mcp.channelIds" . | quote }}
             # Always emitted, even when empty. The deployed manifest should
             # state "no private channels" explicitly rather than leave an
             # operator inferring it from an absent variable — the same reason
@@ -172,7 +172,7 @@ spec:
           # which is why the sustained-5xx alert is load-bearing rather than a
           # nice-to-have. It lives in the platform prometheus values
           # (gitops/argocd/platform/prometheus/applicationset.yaml, group
-          # `mcp-slack`), not in this chart — see values.yaml for why.
+          # `vitruvian-slack-mcp`), not in this chart — see values.yaml for why.
           livenessProbe:
             httpGet: { path: /health, port: http }
             periodSeconds: 20

@@ -760,7 +760,7 @@ mod tests {
         }
         assert!(names.len() >= 8);
 
-        let readme = std::fs::read_to_string("apps/mcp/slack/README.md")
+        let readme = std::fs::read_to_string("apps/mcp/vitruvian-slack-mcp/README.md")
             .or_else(|_| std::fs::read_to_string("README.md"))
             .expect("README.md must be readable");
         let undocumented: Vec<String> = names

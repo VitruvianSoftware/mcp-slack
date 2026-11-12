@@ -18,19 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use mcp_slack_rs_lib::auth::{
-    create_token_verifier, full_scope_string, TokenVerifier, TokenVerifierConfig,
-};
-use mcp_slack_rs_lib::config::{resolve_config, TransportMode};
-use mcp_slack_rs_lib::http_transport::{
-    start_http_transport, wait_for_shutdown_signal, McpServer, DEFAULT_SHUTDOWN_GRACE_MS,
-    SERVER_NAME, SERVER_VERSION,
-};
-use mcp_slack_rs_lib::slack_client::SlackClient;
-use mcp_slack_rs_lib::tools::tools_for;
 use std::collections::HashMap;
 use std::io::{BufRead, Write};
 use std::sync::Arc;
+use vitruvian_slack_mcp_rs_lib::auth::{
+    create_token_verifier, full_scope_string, TokenVerifier, TokenVerifierConfig,
+};
+use vitruvian_slack_mcp_rs_lib::config::{resolve_config, TransportMode};
+use vitruvian_slack_mcp_rs_lib::http_transport::{
+    start_http_transport, wait_for_shutdown_signal, McpServer, DEFAULT_SHUTDOWN_GRACE_MS,
+    SERVER_NAME, SERVER_VERSION,
+};
+use vitruvian_slack_mcp_rs_lib::slack_client::SlackClient;
+use vitruvian_slack_mcp_rs_lib::tools::tools_for;
 
 /// SHUTDOWN_GRACE_MS (the chart derives it from terminationGracePeriodSeconds),
 /// else the 10 s the TS `close()` defaulted to.
@@ -50,13 +50,13 @@ fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
     for arg in &args {
         if arg == "--help" || arg == "-h" {
-            println!("mcp-slack v2.0.0 - Model Context Protocol server for Slack");
-            println!("Usage: mcp-slack [--help] [--version]");
+            println!("vitruvian-slack-mcp v2.0.0 - Vitruvian Slack MCP server");
+            println!("Usage: vitruvian-slack-mcp [--help] [--version]");
             println!("Configured via environment variables (MCP_TRANSPORT=stdio|http, SLACK_BOT_TOKEN, SLACK_TEAM_ID, etc.).");
             return;
         }
         if arg == "--version" || arg == "-V" {
-            println!("mcp-slack 2.0.0");
+            println!("vitruvian-slack-mcp 2.0.0");
             return;
         }
     }
@@ -126,7 +126,7 @@ fn main() {
         };
 
         eprint!(
-            "mcp-slack server v2.0.0 running on http :{} ({} tools, {} channels allow-listed)\n",
+            "vitruvian-slack-mcp server v2.0.0 running on http :{} ({} tools, {} channels allow-listed)\n",
             http_cfg.port,
             advertised_tools_count,
             config.channel_guard.allowed.len()
@@ -161,7 +161,7 @@ fn main() {
 
     let server = create_server();
     eprint!(
-        "mcp-slack server v2.0.0 running on stdio ({} tools)\n",
+        "vitruvian-slack-mcp server v2.0.0 running on stdio ({} tools)\n",
         advertised_tools_count
     );
 

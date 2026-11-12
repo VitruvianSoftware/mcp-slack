@@ -41,8 +41,8 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ include "mcp-slack.name" . }}
-  labels: {{- include "mcp-slack.labels" . | nindent 4 }}
+  name: {{ include "vitruvian-slack-mcp.name" . }}
+  labels: {{- include "vitruvian-slack-mcp.labels" . | nindent 4 }}
 spec:
   parentRefs:
     - group: gateway.networking.k8s.io
@@ -62,7 +62,7 @@ spec:
       backendRefs:
         - group: ""
           kind: Service
-          name: {{ include "mcp-slack.name" . }}
+          name: {{ include "vitruvian-slack-mcp.name" . }}
           port: 80
           # Written explicitly even with a single backendRef. Gateway API
           # defaults an omitted weight to 1 server-side and ArgoCD does not
